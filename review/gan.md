@@ -1,6 +1,6 @@
 # Generative Adversarial Networks (2014)
 ---
-<br>
+<br></br>
 
 ## 1. Introduction
 - deep learning이 Discriminative task에서 괄목할 만한 성과를 보이고 있음
@@ -20,8 +20,9 @@
 - 논문에서는 G가 random noise를 입력으로 받아 샘플을 생성해내는 과정과 D가 이를 판별해내는 과정을 모두 multilayer perceptron으로 구현함. → *Adversarial Nets*
 - 이를 통해 architecture의 학습 과정은 backpropagration과 dropout 알고리즘만을 활용하여 학습이 가능해지고, 이전의 approximate inference 혹은 markov chain 등의 과정은 필요하지 않게 됨.
 
+<br></br>
 
-## 2. Related Work (reference를 얼마나 공부해야될지?)
+## 2. Related Work 
 ![generative_taxonomy](../figures/generative_models_taxonomy.png)
 - undirected graphical models with latent models (such as Resricted Boltzmann machines, deep Boltzmann machines)
   - this quantity and its gradient are **intractable** for all but the most trivial instances
@@ -37,6 +38,8 @@
   - 역전파가 가능하다는 점에서 good
   - parameterized Markov Chain
   - GAN은 sampling에 있어서 markov chain을 요구하지 않는다는 점에서 이점이 있음.
+
+<br></br>
   
 ## 3. Adversarial Nets
 - Architecture
@@ -60,6 +63,7 @@ $$ \min_{G} \max_{D} V(D,G) = \mathop{\mathbb{E}}_{x{\sim}p_{data}(x)}[log D(x)]
 
 위의 식을 설명하면, D가 진짜를 진짜라고 판별할 로그 확률의 기댓값 + D가 가짜를 가짜라고 판별할 로그 확률의 기댓값 으로 설명할 수 있다.
 D의 경우에는 위의 식을 최대화해야하고, G의 경우에는 $\mathop{\mathbb{E}}_{z{\sim}p_z(z)}[log(1-D(G(z)))]$ 를 최소화해야 함. 학습은 동시에 수행된다. (minimax two-player game)
+
 <br>
 
 - Alternating training
@@ -91,6 +95,7 @@ D의 경우에는 위의 식을 최대화해야하고, G의 경우에는 $\matho
 
 따라서 최종적으로는 $p_g$ = $p_{data}$가 되고, discriminator D는 $\frac{1}{2}$의 확률값을 가지는 uniform distribution의 형태를 보이게 됨. → 이론적인 unique solution
 
+<br></br>
 
 ## 4. Theoretical Results
 G는 묵시적으로 확률분포 $p_g$를 정의함. 해당 확률분포는 확률변수 $z$가 $p(z)$를 따를 때 G(z)로부터 파생된 샘플들의 분포임을 밝힘. 즉, 확률분포에 대한 어떠한 가정 없이 확률분포가 학습 과정 중 학습이 된다는 것을 상정하고 있음. 
@@ -99,6 +104,8 @@ G는 묵시적으로 확률분포 $p_g$를 정의함. 해당 확률분포는 확
 
 - Algorithm 1.
   ![algorithm](../figures/gan_algorithm.png)
+
+<br>
 
 ### 4.1. Global Optimality of $p_g = p_{data}$
 
@@ -135,15 +142,21 @@ $$ C(G) = -log4 + 2*JSD(p_{data}||p_g)$$
 
 Jensen-Shannon divergence의 경우엔 항상 non-negative이며, 0인 경우는 두 확률분포가 동일할 경우에만 가능하다. 따라서 $C* = -log4$은 C(G)의 전역 최솟값이며 이 경우는 $p_g = p_{data}$일 경우에만 가능하다. 즉, generator function이 완벽하게 data generating process를 모방할 경우에 가능해지는 것이다.
 
+<br>
+
 ## 4.2. Convergence of Algorithm 1
+
 G와 D가 충분한 capacity가 있다고 가정하면, Algorithm 1에 따라 D는 주어진 G에서 D의 최적값에 도달 가능하다. 또한, $p_g$ 또한 objective인
-$$\mathop{\mathbb{E}}_{x{\sim}p_{data}}[logD^*_G(x)] + \mathop{\mathbb{E}}_{x{\sim}p_{g}}[log(1-D^*_G(x))]$$를** 향상시키는 방향으로 업데이트되며 최종적으로 $p_g$는 $p_{data}$로 수렴하게 된다.
+$$\mathop{\mathbb{E}}_{x{\sim}p_{data}}[logD^*_G(x)] + \mathop{\mathbb{E}}_{x{\sim}p_{g}}[log(1-D^*_G(x))]$$
+를 향상시키는 방향으로 업데이트되며 최종적으로 $p_g$는 $p_{data}$로 수렴하게 된다.
 
 
 4절은 GAN objective와 Algorithm의 이론적 정당성을 밝히고 있음. 하지만 실제에 이러한 이론적 정당성이 100프로 적용될 수는 없음.
 실제로는 $p_g$를 직접적으로 나타내지 않고 $G(z;\theta_g)$로 간접적으로 표현하고 $p_g$를 업데이트하는 것이 아니라 $\theta_g$를 업데이트하게 됨. MLP로 정의된 G가 완벽히 convex한 함수는 아니지만, 성능이 매우 좋으므로 theoretical guarantee가 조금 부족하더라도 MLP를 representation에 사용.
 
-## 5. **Experiments**
+<br></br>
+
+## 5. Experiments
 
 - Data: MNIST, TFD, CIFAR-10
 - Activations: mixture of ReLU and sigmoid activations for G, maxout activation for D.
@@ -156,6 +169,7 @@ $$\mathop{\mathbb{E}}_{x{\sim}p_{data}}[logD^*_G(x)] + \mathop{\mathbb{E}}_{x{\s
     - ReLU의 장점을 취하되 dying ReLU 문제를 해결
     - 하지만 전체 파라미터가 증가한다는 단점이 존재
   
+  <br>
 - Gaussian Parzen Window를 이용해서 $p_g$에서 파생된 test set의 확률을 추정함. (fitting a Gaussian Parzen window to the samples generated with G) 이를 통해 해당 distribution 하에서 log-likelihood를 계산 후 report.
 
 ![ll_report](../figures/gan_ll_gpw.png)
@@ -171,10 +185,10 @@ $$\mathop{\mathbb{E}}_{x{\sim}p_{data}}[logD^*_G(x)] + \mathop{\mathbb{E}}_{x{\s
 
 ## 6. Advantages and disadvantages
 
-- cons
+- disadvantages
   - no explicit representation of $p_g(x)$
   - D must be synchronized well with G during training (G와 D의 학습이 조화롭게 이루어지는 것이 필요. D와 G의 학습 속도가 어느 정도 밸런스가 맞아야 함을 의미. D가 업데이트되지 않고 G가 너무 많이 학습될 경우에는 실제 data generating distribution을 다양하게 학습할 수 없게 됨)
-- pros
+- advantages
   - only backprop needed (no Markov Chain, no inference during learning)
   - 다양한 함수를 model에 활용하기 좋은 구조.
   - not just copying the training input

@@ -1,11 +1,13 @@
 # Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks (ICLR 2016)
 ---
 <br>
+
 ## 1. Introduction
 - GAN을 학습시키면서 good image representation을 구축하는 방법을 제안함. 이후 Generator(이하 G)와 discriminator(이하 D) 네트워크의 일부분을 지도학습의 feature extractor로 재사용하는 방법을 제안.
 - 기존 GAN의 경우에는 불안정한 학습으로 인한 이상한 출력을 생성한다는 단점이 존재했음. (DCGAN에서는 이러한 단점을 개선)
 - GAN의 학습을 이해하기 위해 직접 GAN의 학습과정 및 중간 representation을 시각화.
 <br>
+
 #### Contributions
 저자는 논문의 contribution으로 다음의 네 가지를 제시함.
 - **Stable training process**: GAN의 학습 안정성을 높인 Convolutional GANs 구조를 제안 (DCGANs)
@@ -108,13 +110,16 @@ cf.) semantic-hashing
 (추측컨대, 이미지 semantic을 해싱 키로 사용하고 value를 이미지로 매칭해서 중복 제거를 꾀한 듯함. 해당 해시테이블에서 collision이 일어난다는 것은 이미지 중복이 일어난다는 뜻이므로)
 
 <br>
+
 ### 4.2. Faces
 scraping을 통해서 이미지 수집 후 face detection을 통해 최종적으로 35만개의 face box를 얻어냈음. 이때도 data augmentation은 수행하지 않음.
 <br>
+
 ### 4.3. ImageNet-1K
 32x32 resized center crops를 사용해서 이미지를 학습시키고, 역시 data augmentation은 적용되지 않았음.
 
 <br></br>
+
 ## 5. Empirical Validation of DCGANs capabilities
 
 

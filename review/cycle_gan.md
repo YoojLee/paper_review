@@ -1,6 +1,7 @@
 # Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks (ICCV 2017)
 ---
 <br>
+
 ## 1. Introduction
 - image-to-image translation: **이미지 쌍을 활용해** 입력 이미지와 출력 이미지 간의 mapping을 학습
 - 하지만, 이미지 쌍 데이터는 그 비용이 매우 크다.
@@ -25,7 +26,7 @@
 
 <br><br>
 
-  ## 2. Related work
+## 2. Related work
 
   - GANs
     : adversarial training을 통해서 실제에 가까운 fake 이미지를 생성
@@ -86,6 +87,7 @@
   - $D_X$, $D_Y$: two adversarial discriminators (전자의 경우, $\{x\}$와 $\{F(y)\}$ 를 구분해내야함. 후자의 경우엔 $\{y\}$와 $\{G(x)\}$를 구분해내야.)
 
 <br>
+
 ### 3.1. Adversarial Loss
   applying adversarial losses to both mapping functions
 
@@ -99,6 +101,7 @@
   $$\min_F \max_{D_X} \mathcal{L}_{GAN}(F,D_X,Y,X)$$
 
 <br>
+
 ### 3.2. Cycle Consistency Loss
   Adversarial training은 이론적으로는 mapping G와 F를 output generating function이 data distribution을 완벽히 근사할 수 있도록 학습시키는 게 가능함. 그러나 이는 모델 capacity가 충분히 크다고 가정할 때 network가 입력 이미지 셋을 target domain의 *임의의* 이미지 permutation으로 매핑이 됨을 의미한다.
   
@@ -119,6 +122,7 @@
 간단히, mapping된 값과 실제 original image 간의 L1 loss의 기댓값으로 정의. 참고로, L1-loss 대신 adversarial loss를 사용했을 때 성능의 향상이 관찰되지 않았음.
 
 <br>
+
 ### 3.3. Full Objective
 
 $$\mathcal{L}(G, F, D_X, D_Y) = \mathcal{L}_{GAN}(G, D_Y, X, Y) + \mathcal{L}(F, D_X, Y, X) + \lambda \mathcal{L}_{cyc}(G,F) $$
@@ -177,7 +181,8 @@ Adversal training을 거친다는 점에서 adversarial autoencoder의 특징을
     - batch size = 1
     - learning rate = 0.0002
     - 100 에폭 학습 후 나머지 100 에폭은 점점 learning rate을 0에 가깝게 줄여나간다.
-<br>
+<br><br>
+
 ## 5. Results
   1) 최근의 다른 unpaired image-to-image translation 방법론과의 비교 (on paired datasets)를 통해 모형의 성능 평가
   2) Loss에 대한 ablation study를 통해 adversarial loss와 cycle consistency loss의 중요도 평가

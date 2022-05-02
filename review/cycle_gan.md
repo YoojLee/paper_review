@@ -121,7 +121,7 @@
 <br>
 ### 3.3. Full Objective
 
-$$\mathcal{L}(G, F, D_X, D_Y) = \mathcal{L}_{GAN}(G, D_Y, X, Y) + \mathcal{L}(F, D_X, Y, X) + \lambda \mathcal{L}_{cyc}(G,F) $$
+$$\mathcal{L}(G, F, D_X, D_Y) = \mathcal{L}_{GAN}(G, D_Y, X, Y) + \mathcal{L}_{GAN}(F, D_X, Y, X) + \lambda \mathcal{L}_{cyc}(G,F) $$
 
 여기서 $\lambda$는 cycle consistency loss term과 adversarial loss term 간의 상대적인 중요도를 control하는 하이퍼 파라미터이다.
 

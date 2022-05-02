@@ -1,7 +1,7 @@
 import argparse
 from cmath import inf
+import cv2
 import os
-from re import I
 from torchvision import transforms, datasets
 from torchvision.utils import save_image
 
@@ -25,8 +25,8 @@ def validation(epoch, valid_loader, g, d, criterion, device, args):
     with torch.no_grad():
         for step, (images, _) in pbar:
             b = images.shape[0]
-            real_label = torch.ones(b).to(device)
-            fake_label = torch.zeros(b).to(device)
+            real_label = torch.ones(b).view(-1,1).to(device)
+            fake_label = torch.zeros(b).view(-1,1).to(device)
 
             images = images.to(device)
 
@@ -41,7 +41,7 @@ def validation(epoch, valid_loader, g, d, criterion, device, args):
             fake_loss = criterion(d(fake_images), fake_label)
             d_loss = (real_loss + fake_loss) / 2
 
-            description = f"Validation #{epoch} || Generator Loss: {round(g_loss, 4)} || Discriminator Loss: {round(d_loss, 4)}"
+            description = f"Validation #{epoch} || Generator Loss: {round(g_loss.item(), 4)} || Discriminator Loss: {round(d_loss.item(), 4)}"
             pbar.set_description(description)
 
         return (g_loss + d_loss) / 2
@@ -50,6 +50,9 @@ def validation(epoch, valid_loader, g, d, criterion, device, args):
 def train(train_loader, g, d, opt_g, opt_d, criterion, device, args, val_loader = None):
     best_loss = float(inf)
 
+    # sample 저장을 위한 디렉토리
+    os.makedirs(args.sample_save_dir, exist_ok=True)
+    
     for epoch in range(args.n_epochs):
         g.train()
         d.train()
@@ -63,8 +66,8 @@ def train(train_loader, g, d, opt_g, opt_d, criterion, device, args, val_loader 
             
             # label 만들기
             b = images.shape[0]
-            real_label = torch.ones(b).to(device)
-            fake_label = torch.zeros(b).to(device)
+            real_label = torch.ones(b).view(-1,1).to(device)
+            fake_label = torch.zeros(b).view(-1,1).to(device)
 
             images = images.to(device) # dataloader는 device에 안 올려주고 대신 하나씩 꺼내올 때 device에 올려주기
 
@@ -85,13 +88,13 @@ def train(train_loader, g, d, opt_g, opt_d, criterion, device, args, val_loader 
             opt_d.step()
 
 
-            description = f'Epoch: {epoch+1}/{args.n_epochs} || Step: {step+1}/{len(train_loader)} || Generator Loss: {round(g_loss, 4)} || Discriminator Loss: {round(d_loss, 4)}'
+            description = f'Epoch: {epoch+1}/{args.n_epochs} || Step: {step+1}/{len(train_loader)} || Generator Loss: {round(g_loss.item(), 4)} || Discriminator Loss: {round(d_loss.item(), 4)}'
             pbar.set_description(description)
 
             batches_done = epoch * len(train_loader) + step
 
             if batches_done % args.sample_interval == 0:
-                save_image(fake_images.detach()[:25], "images/%d.png" % batches_done, nrow=5, normalize=True)
+                save_image(fake_images.clone().detach()[:25], "images/%d.png" % batches_done, nrow=5, normalize=True)
             
             if args.do_validation:
                 val_loss = validation(epoch+1, val_loader, g, d, criterion, device, args)
@@ -116,11 +119,10 @@ def main(args):
         args: arguments parsed from the user command.    
     """
     # device 선언
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(device)
+    device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
     # load the data
-    os.makedirs("data/mnist", exist_ok=True) # exist_ok = True -> 기존에 존재하는 directory면 directory 만들지 않고 넘어가기
+    os.makedirs(args.data_dir, exist_ok=True) # exist_ok = True -> 기존에 존재하는 directory면 directory 만들지 않고 넘어가기
 
     train_loader = DataLoader(
         dataset = datasets.MNIST("data/mnist",
@@ -138,8 +140,8 @@ def main(args):
 
     
     # model 선언
-    generator = Generator(latent_dim = args.latent_dim, output_size = (args.img_size, args.img_size, args.channels), normalize=args.use_batch_norm)
-    discriminator = Discriminator(in_features = args.channels*args.img_size**2)
+    generator = Generator(latent_dim = args.latent_dim, output_size = (args.channels, args.img_size, args.img_size), normalize=args.use_batch_norm).to(device) # output_size = c,h,w 로 넣어주는 것 잊지 말 것.
+    discriminator = Discriminator(in_features = args.channels*args.img_size**2).to(device)
     
     # optimizer
     optimizer_G = torch.optim.Adam(params = generator.parameters(), lr=args.lr, betas = (args.b1, args.b2))
@@ -154,9 +156,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    
     args = parse_args()
     main(args)
-    

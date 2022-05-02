@@ -14,7 +14,9 @@ def parse_args():
     arg_parser.add_argument("-img_size", default=28, type=int)
     arg_parser.add_argument("-channels", default=1, type=int)
     arg_parser.add_argument("-sample_interval", default=400, type=int)
+    arg_parser.add_argument("-data_dir", default="./data/mnist/")
     arg_parser.add_argument("-model_save_dir", default="./weights/")
+    arg_parser.add_argument("-sample_save_dir", default="./images/")
     arg_parser.add_argument("--use_batch_norm", action="store_true")
     arg_parser.add_argument("--do_validation", action="store_true")
     args = arg_parser.parse_args()
@@ -36,5 +38,4 @@ def save_checkpoint(epoch, model_g, model_d, loss, optimizer_g, optimizer_d, sav
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    print(args)
+    torch.cuda.empty_cache()

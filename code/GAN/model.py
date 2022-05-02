@@ -1,7 +1,7 @@
 """
 GAN 코드 필사 및 리뷰 (약간의 코드 수정 O)
 
-- Author: eriklindernoren
+- Author: YoojLee
 - reference: https://github.com/eriklindernoren/PyTorch-GAN/blob/master/implementations/gan/gan.py
 """
 from cv2 import IMWRITE_PNG_STRATEGY_DEFAULT
@@ -83,6 +83,3 @@ class Discriminator(nn.Module):
         p = self.model(flattened)
 
         return p
-
-
-

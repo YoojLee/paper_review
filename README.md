@@ -5,3 +5,8 @@
 - [X] Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks
 - [X] Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks
   - [ ] 피드백 추가한 사항 더 공부하기
+
+
+# 코드 구현
+
+- [ ] GAN의 alternating training check

@@ -125,7 +125,7 @@
 
 ### 3.3. Full Objective
 
-$$\mathcal{L}(G, F, D_X, D_Y) = \mathcal{L}_{GAN}(G, D_Y, X, Y) + \mathcal{L}(F, D_X, Y, X) + \lambda \mathcal{L}_{cyc}(G,F) $$
+$$\mathcal{L}(G, F, D_X, D_Y) = \mathcal{L}_{GAN}(G, D_Y, X, Y) + \mathcal{L}_{GAN}(F, D_X, Y, X) + \lambda \mathcal{L}_{cyc}(G,F) $$
 
 여기서 $\lambda$는 cycle consistency loss term과 adversarial loss term 간의 상대적인 중요도를 control하는 하이퍼 파라미터이다.
 
@@ -186,7 +186,7 @@ Adversal training을 거친다는 점에서 adversarial autoencoder의 특징을
 ## 5. Results
   1) 최근의 다른 unpaired image-to-image translation 방법론과의 비교 (on paired datasets)를 통해 모형의 성능 평가
   2) Loss에 대한 ablation study를 통해 adversarial loss와 cycle consistency loss의 중요도 평가
-  3) paried dataset이 없을 경우의 알고리즘 활용성을 위한 알고리즘의 확장성 (generality)에 대한 평가
+  3) paired dataset이 없을 경우의 알고리즘 활용성을 위한 알고리즘의 확장성 (generality)에 대한 평가
 
 
 ### 5.1. Evaluation
@@ -303,3 +303,19 @@ paired dataset이 없는 다양한 세팅에서 모델을 적용
     - weakly supervised or semi-supervised learning의 방법을 사용하는 등으로 해결해볼 수 있음
 
 그럼에도 불구하고 unsupervised setting에서 image to image translation의 성능을 크게 높였을 뿐 아니라, 보다 다양한 application이 가능해졌다는 점에서 그 의의가 큼.
+
+
+---
+### 부족했던 점
+- 왜 inverse mapping (reconstruction)을 하는지 -> 왜 단순히 GAN으로는 안되고 Y to X를 해야되는 거지? 왜 reconstruction이 필요한 거지?
+  - reconstruction을 해줌으로써 mode collapse를 방지할 수 있음.
+- network의 backbone은 autoencoder 구조로는 어렵고 resnet을 썼다
+  - geometric change에 취약해짐. resnet이 그나마 나음.
+- reconstruction이다. inverse mapping은
+- 왜 근데 X → Y → X 만 필요한데 Y → X → Y까지 했지? augmentation + generalization performance 높아짐
+
+### 개인적으로 궁금했던 점
+- fractionally-strided convolution 구현
+- 왜 L1 norm을 쓸까? → pixel-wise하게 비교하는 것들은 L1 norm을 많이 씀.
+- FCN score를 잘 이해하지 못한 것 같음.
+- 한 번 논문을 다시 훑어보는 것도 좋을 것 같음. + 구현을 직접 해봐야 좀 더 이해가 잘 될 것 같다.

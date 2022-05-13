@@ -211,3 +211,87 @@ pix2pix에서는 전체적인 visual quality를 평가하기 위해, 두 가지 
 - L1: color 또한 averaging하는 경향이 있음. 실제로 L1 loss를 사용하여 이미지 생성을 해낸 결과 color distribution이 ground truth의 color distribution 대비 상당히 narrow함 (median에 모여있는 경우가 많다).
 - cGAN의 경우에는 output distribution이 ground truth와 보다 가깝게 위치하고 있음을 알 수 있다.
 - 즉, color의 측면에서도 L1은 averaging하면서 dull image를 내뱉는 경향이 있음. 반면, cGAN의 경우에는 이런 grayish한 output이 unrealistic함을 잘 파악하기 때문에 실제 color distribution과 일치하는 방향으로 학습을 수행할 수 있다는 점! (보다 color distribution을 잘 modeling rathen than L1 which encourages to "average" colors)
+<br>
+
+### 4.3. Analysis of the generator architecture
+
+- U-Net 구조는 low-level 정보를 네트워크를 가로질러서 바로 전달 가능함. 이러한 U-Net 구조가 전체 네트워크 성능에 좋은 영향을 미치는지 실험을 진행함. encoder-decoder, U-Net 구조를 각각 Cityscapes labels ↔ photos 작업에 대해서 evaluation을 수행 후, 결과 시각화 및 fcn scores를 계산해서 비교함. 
+비교군인 encoder-decoder 구조의 경우에는 skip-connection을 제외하고는 U-Net과 구조가 동일함. 
+
+![gen_architecture_exp](../figures/generator_architecture_experiments.png)
+
+- 위의 그림을 참고하면, Encoder-Decoder 구조는 진짜같은 이미지를 생성해내는 데에 실패. objective에도 약간의 variation을 주었는데 두 개의 objective 하에서 모두 U-Net이 더 우수한 생성 결과를 보여줌. Encoder-Decoder 같은 경우에는 L1+cGAN 목적함수 하에서 visual artifacts가 관찰됨.
+
+![gen_architecture_exp2](../figures/generator_architecture_experiments2.png)
+- 정량적인 평가를 수행해보았을 때도 모든 경우에 U-Net이 훨씬 우수한 성능을 보여주었다. 
+<br>
+
+### 4.4. From PixelGANs to PatchGANs to ImageGANs
+Discriminator의 receptive field 크기에 따른 성능 비교 실험을 진행. 이 섹션에서의 실험은 loss를 L1+cGAN loss로 고정하여 진행. receptive field의 사이즈의 조정은 discriminator의 깊이 조정을 통해 이루어짐.
+
+![discriminator_receptive_field2](../figures/discriminator_receptive_field2.png)
+![discriminator_receptive_field](../figures/discriminator_receptive_field.png)
+
+- 1X1 PixelGAN의 경우에는 spatial sharpness에는 큰 영향을 끼치지는 못했으나, 결과의 색감을 보다 다양하게 함. 예컨대, L1 loss로 네트워크를 학습시킨 경우에는 사진 속 트럭이 회색으로 표현된 경우에 반해 1x1 pixel GAN으로 학습시킨 경우에는 사진 속 트럭이 빨간색으로 표현됨. (이는 cGAN이 color histogram matching의 lightweight solution으로 추후 사용될 여지를 보여줌)
+
+- 16X16 PatchGAN의 경우에는 spatial sharpness를 증가시키고 실제로도 fcn scores를 증가시켰으나, 타일무늬의 결점이 생성 이미지에서 관찰됨.
+
+- 70X70 PatchGAN의 경우에는 타일무늬 결점 등을 완화하면서 fcn score에서 좀 더 좋은 결과를 보여주었음.
+
+- 286X286 full ImageGAN에서는 70X70 PatchGAN의 생성결과보다 큰 향상이 없었고, 실제로 fcn score는 떨어짐. (이는 아마, full image receptive field를 형성하기 위해서는 네트워크 깊이가 깊어지면서 파라미터 수가 증가함에 따라 학습이 보다 어려워지기 때문일 것)
+
+#### Fully-convolutional translation
+PatchGAN의 장점은 고정된 사이즈의 patch discriminator이기 때문에 임의의 큰 사이즈 이미지에 적용이 가능하다는 점이다. generator도 이와 마찬가지로 convolution 방식으로 적용이 될 수 있을 것 (학습 이미지보다 더 큰 이미지에! → local patch 영역을 잡고 거기에서 이미지 생성을 시키는 방식..?)
+
+실제로, 256 사이즈 이미지에서 학습시킨 generator의 경우 512 사이즈 이미지에서 잘 생성해냄을 알 수 있었음.
+<br>
+
+### 4.5. Perceptual validation (AMT 실험 결과 정리)
+![perceptual_validation](../figures/perceptual_validation.png)
+
+- maps ↔ aerial photos 작업에 대해 AMT 실험을 수행했을 때, L1 loss를 사용했을 때는 두 경우 모두 참여자들을 거의 속이지 못함. (table의 %는 실험 참여자들이 real이라고 응답한 비율. 높을 수록 참여자를 잘 속였다. 보다 realistic image를 생성해냈음을 의미함.) cGAN을 추가했을 때는 photo → map의 경우에는 결과가 좋지는 못했으나 L1만 사용했을 때보단 좋은 결과를 도출할 수 있었음. map → photo의 경우에는 cGAN을 추가적으로 사용하면서 결과가 매우 향상되었음을 확인할 수 있다.
+<br>
+
+- colorization task의 경우, 기존의 colorization 알고리즘(R.Zhang et al., 2016)과 비교함. 비교군에는 단순 L2 Regression도 포함됨. 
+- pix2pix 아키텍처의 경우에는 L2 regression 방식보다 약간 나은 결과를 보여줌. 다만, 기존 colorization 알고리즘보다는 좋지 못한 결과를 보여줬으나 기존의 colorization 아키텍처는 colorization에 특화된 아키텍처이고 pix2pix의 경우에는 보다 범용적인 아키텍처라는 점에서 그 차이가 있다.
+<br>
+
+### 4.6. Semantic Segmentation
+cGANs은 output이 보다 복잡한 디테일이 많고 사진과 같은 경우에 해당하는 문제들에 효과적으로 보임. 그렇다면, semantic segmentation과 같은 보다 덜 복잡한 output을 갖는 vision task에는 어떻게 적용될 것인가?
+
+![semseg](../figures/pix2pix_semseg.png)
+![semgseg_table](../figures/semseg_table.png)
+
+- Cityscapes datasets에 대해서 segment map (label)을 생성해내는 task를 수행함. 
+- 주목할 점은 cGAN 자체만으로도 어느 정도 괜찮은 결과가 나왔다는 점임. label을 생성해낸다는 점에서 기존의 이미지와는 다르게 GAN이 nearly **discrete**한 값을 생성해낼 수 있다는 점을 밝힘.
+- 그러나, cGAN이 어느 정도 label을 생성해내는데 어느 정도 성공을 해냈으나, 그 결과가 가장 좋다고는 할 수 없음. L1 loss의 도움을 받았을 때 결과가 향상되긴 했으나 L1 loss만 사용하여 semantic segmentation을 수행하는 것이 성능이 더 좋았음.
+  - 이는 semantic segmentation의 경우(vision tasks)에는 graphics tasks(output 값이 highly detailed & realistic) 대비 목표가 비교적 분명하기 때문에 L1 loss만으로도 목적 달성에 충분하기 때문으로 보임.
+- map을 실제로 봤을 때도 어느 정도 realistic하고 세세한 segment map을 생성해냈으나 여러 hallucinated object들이 관찰됨.
+<br>
+
+### 4.7. Community-driven research
+![application](../figures/pix2pix_apps.png)
+Twitter user 들을 통해서 아키텍처가 다양하게 적용이 됨. 이로써 논문에서 제안된 방법이 image-to-image translation에 있어서 범용성을 갖는다는 걸 보여줌.
+
+<br></br>
+
+## 5. Conclusion
+- conditional adversarial networks가 다양한 image-to-image translation 작업에 사용될 수 있다는 것을 보임.
+- 하나의 loss가 가지고 있는 데이터와 task에 맞게 잘 적용됨을 보여줌. (not tailered to a specific task. Rather, one loss for various tasks.)
+  
+→ 즉, **high applicability (generality)** and simple architecture.
+
+---
+## 느낀 점
+- 굉장히 새로운 architecture를 제안했다기보다는 (물론 G, D에 architectural design이 들어가긴 했으나 어떤 paradigm shift는 아니었다..이런 의미), image to image translation task에 conditional GANs가 잘 동작한다는 것을 보여줌.
+- generator에 skip connection을 적용하게 된 로직이 잘 짜여져있다고 생각함. 단, 이는 paired set에만 적용이 된다는 점에서 이러한 skip connection를 동반한 generator 구조가 매우 범용적이지는 않을 수 있겠다는 생각을 하게 됨.
+- PatchGAN 구조의 discriminator의 경우 receptive field로만 구현해냈다는 점이 신선했음. 다만 이를 구현할 때 receptive field를 계산을 어떻게 해서 network의 depth를 조절할지는 아직 완벽히 파악하지 못한 듯함.
+- 실험의 경우에는 굉장히 다양하게 수행함. 
+  - objective 각 components에 대한 ablation study도 수행 (objective에 대한 정당성을 보여주기 위함인 듯. L1 + cGAN)
+  - generator architecture에서 skip-connection에 대한 ablation study
+  - discriminator architecture의 경우 patch단위로 판별하는 discriminator임이 가장 key component였다고 생각함. 이에 receptive field 크기를 조절하면서 performance measure를 보여줌.
+  - semantic segmentation task에도 GANs를 확장하면서 어느 정도 discrete distribution도 근사 가능하다는 점을 보였으나, 성능이 그렇게 좋지는 못했어서 과연 의미가 있을까 하는 의구심 한 스푼.
+- 정량 지표를 sematic segmentation을 활용해서 만들어낸 점 + 보완책으로 정성 평가도 동시에 수행
+- 결론적으로, 논문에서 보여주고 싶은 건 'generality'인 것 같음. 
+  - 기존의 image to image translation이라는 분야에는 다양한 sub-task가 존재하고 하나의 솔루션이 각 sub-task마다 적용되는 식으로 하나의 범용적인 solution이 없었음.
+  - cGANs을 활용한 간단한 architecture로 generic solution을 만들어냈다는 점.

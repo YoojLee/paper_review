@@ -1,6 +1,6 @@
 # Image-to-Image Translation with Conditional Adversarial Networks
 
-networks not only learn the mapping from input image to output image, but also learn a loss function to train this mapping
+networks not only learn the mapping from input image to output image, but also learn a loss function to train this mapping (task-specific loss가 아닌 general하게 적용 가능한 loss라는 점.)
 
 ---
 ## 1. Introduction
@@ -283,15 +283,18 @@ Twitter user 들을 통해서 아키텍처가 다양하게 적용이 됨. 이로
 
 ---
 ## 느낀 점
-- 굉장히 새로운 architecture를 제안했다기보다는 (물론 G, D에 architectural design이 들어가긴 했으나 어떤 paradigm shift는 아니었다..이런 의미), image to image translation task에 conditional GANs가 잘 동작한다는 것을 보여줌.
+- 제목 그대로 image to image translation task에 conditional GANs가 잘 동작한다는 것을 보여줌.
+  - conditional GANs에 대한 내용이나 random noise z의 필요성 등에 더 생각해보게 됨.
+  - 아직 discriminator가 정확히 어떤 output을 갖는지는 해결이 안됨.
+  - receptive field를 어떻게 manipulate할 수 있을지?
 - generator에 skip connection을 적용하게 된 로직이 잘 짜여져있다고 생각함. 단, 이는 paired set에만 적용이 된다는 점에서 이러한 skip connection를 동반한 generator 구조가 매우 범용적이지는 않을 수 있겠다는 생각을 하게 됨.
 - PatchGAN 구조의 discriminator의 경우 receptive field로만 구현해냈다는 점이 신선했음. 다만 이를 구현할 때 receptive field를 계산을 어떻게 해서 network의 depth를 조절할지는 아직 완벽히 파악하지 못한 듯함.
-- 실험의 경우에는 굉장히 다양하게 수행함. 
+- 실험의 경우에는 굉장히 다양하게 수행함.
   - objective 각 components에 대한 ablation study도 수행 (objective에 대한 정당성을 보여주기 위함인 듯. L1 + cGAN)
   - generator architecture에서 skip-connection에 대한 ablation study
   - discriminator architecture의 경우 patch단위로 판별하는 discriminator임이 가장 key component였다고 생각함. 이에 receptive field 크기를 조절하면서 performance measure를 보여줌.
   - semantic segmentation task에도 GANs를 확장하면서 어느 정도 discrete distribution도 근사 가능하다는 점을 보였으나, 성능이 그렇게 좋지는 못했어서 과연 의미가 있을까 하는 의구심 한 스푼.
 - 정량 지표를 sematic segmentation을 활용해서 만들어낸 점 + 보완책으로 정성 평가도 동시에 수행
-- 결론적으로, 논문에서 보여주고 싶은 건 'generality'인 것 같음. 
+- 결론적으로, 논문에서 보여주고 싶은 건 'generality'인 것 같음.
   - 기존의 image to image translation이라는 분야에는 다양한 sub-task가 존재하고 하나의 솔루션이 각 sub-task마다 적용되는 식으로 하나의 범용적인 solution이 없었음.
   - cGANs을 활용한 간단한 architecture로 generic solution을 만들어냈다는 점.

@@ -14,4 +14,5 @@
 # 코드 구현
 
 - [ ] GAN의 alternating training check
-- [ ] cycleGAN
+- [X] cycleGAN
+  - [ ] 추가할 사항들 체크하고 정리

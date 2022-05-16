@@ -23,7 +23,7 @@ def train(train_loader, n_epochs, models, optimizers, lambda_cyc, device, sample
 
     criterion_G = AdversarialLoss(mode='g') # 왜 direction끼리 얘를 공유해야하는지 잘 모르겠음..
     criterion_D = AdversarialLoss(mode='d')
-    criterion_cyc = nn.L1Loss()
+    criterion_cyc = CycleConsistencyLoss()
 
     G.train()
     F.train()
@@ -59,10 +59,9 @@ def train(train_loader, n_epochs, models, optimizers, lambda_cyc, device, sample
             loss_F_yx = criterion_G.forward_G(d_yx, real_label)
 
             # cycle loss 계산
-            loss_cyc_forward = criterion_cyc(F(fake_xy), Y)
-            loss_cyc_backward = criterion_cyc(G(fake_yx), X)
+            loss_cyc = criterion_cyc(X, Y, F(fake_xy), G(fake_yx))
 
-            loss_G = loss_G_xy + loss_F_yx + lambda_cyc*(loss_cyc_forward+loss_cyc_backward)
+            loss_G = loss_G_xy + loss_F_yx + lambda_cyc*loss_cyc
             
             loss_G.backward()
             optim_G.step()

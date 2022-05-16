@@ -136,7 +136,7 @@ class Discriminator(nn.Module):
         
         # building conv block
         for i in range(self.n_layers):
-            if i==0:
+            if i == 0:
                 ic, oc = input_c, n_filter
                 layers.append(self._make_block(ic, oc, kernel_size=self.kernel_size, stride=2, normalize=False))
             else:

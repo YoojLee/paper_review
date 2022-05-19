@@ -9,6 +9,9 @@
 - [X] pix2pix
   - [ ] discriminator output이 정확히 뭔지 확인할 것
 - [ ] StarGANs
+- [ ] Collaborative Filtering for Implicit Feedback Datasets
+- [ ] Contrastive Learning for Unpaired Image-to-Image Translation
+- [ ] ViT
 
 
 # 코드 구현

@@ -1,5 +1,4 @@
 import torch
-from torch import nn
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
@@ -8,18 +7,22 @@ from criterion import *
 from dataset import UnalignedDataset
 from model import *
 from utils import parse_opt
+from scheduler import DelayedLinearDecayLR
 
 from tqdm import tqdm
 from functools import partial
 import itertools
 import os
 
-def train(train_loader, n_epochs, models, optimizers, lambda_cyc, device, sample_interval, sample_save_dir):
+    
+
+def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, device, sample_interval, sample_save_dir):
     
     os.makedirs(sample_save_dir, exist_ok=True)
 
     G, F, D_x, D_y = models
     optim_G, optim_D = optimizers
+    scheduler_G, scheduler_D = schedulers
 
     criterion_G = AdversarialLoss(mode='g') # 왜 direction끼리 얘를 공유해야하는지 잘 모르겠음..
     criterion_D = AdversarialLoss(mode='d')
@@ -40,7 +43,6 @@ def train(train_loader, n_epochs, models, optimizers, lambda_cyc, device, sample
 
             # label 만들기
             X, Y = data['A'], data['B']
-            b = X.shape[0]
 
             X, Y = X.to(device), Y.to(device)
 
@@ -64,13 +66,13 @@ def train(train_loader, n_epochs, models, optimizers, lambda_cyc, device, sample
             loss_G = loss_G_xy + loss_F_yx + lambda_cyc*loss_cyc
             
             loss_G.backward()
-            optim_G.step()
+            optim_G.step() # alternating training 해야돼서 G랑 D는 optimizer 따로 쓰는 거임.
 
             #### Discriminator ####
             loss_D_xy = criterion_D.forward_D(D_y(Y), real_label, d_xy, fake_label)
             loss_D_yx = criterion_D.forward_D(D_x(X), real_label, d_yx, fake_label)
 
-            loss_D_xy.backward()
+            loss_D_xy.backward() # loss_G backward는 왜 퉁쳐서 하면서 얘는 따로 함..?
             loss_D_yx.backward()
 
             optim_D.step()
@@ -82,15 +84,15 @@ def train(train_loader, n_epochs, models, optimizers, lambda_cyc, device, sample
 
             if batches_done % sample_interval == 0:
                 save_image(fake_xy.clone().detach()[:25], f"{sample_save_dir}/%d.png" % batches_done, nrow=5, normalize=True)
-
+        scheduler_G.step()
+        scheduler_D.step()
     
 
 def main():
     opt = parse_opt()
 
     # device
-    device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
-    #device='cpu'
+    device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')    
 
     # define transforms
     transforms = BaseAugmentation()
@@ -109,9 +111,12 @@ def main():
     optimizer = partial(torch.optim.Adam, lr=opt.lr)
 
     optim_G = optimizer(params = itertools.chain(G.parameters(), F.parameters()))
-    #optim_F = optimizer(F.parameters())
     optim_D = optimizer(params = itertools.chain(D_x.parameters(), D_y.parameters()))
-    #optim_Dy = optimizer(D_y.parameters())
+
+    # scheduler
+    
+    scheduler_G = DelayedLinearDecayLR(optim_G, opt.lr, 0, 5, decay_after=2, verbose=True)
+    scheduler_D = DelayedLinearDecayLR(optim_D, opt.lr, 0, 5, decay_after=2, verbose=True)
 
 
     kwargs = {
@@ -119,6 +124,7 @@ def main():
         'n_epochs': opt.n_epochs,
         'models': [G, F, D_x, D_y],
         'optimizers': [optim_G, optim_D],
+        'schedulers': [scheduler_G, scheduler_D],
         'lambda_cyc': opt.cycle_loss_lambda,
         'sample_interval': opt.sample_interval,
         'sample_save_dir': opt.sample_save_dir,

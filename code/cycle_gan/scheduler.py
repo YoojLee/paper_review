@@ -40,11 +40,11 @@ class LinearDecayLR(_LRScheduler):
         self.init_lr = initial_lr
         self.target_lr = target_lr
         self.total_iters = total_iters
-        self.substract_lr = self._get_decay_constant()
+        self.subtract_lr = self._get_decay_constant()
         
         super(LinearDecayLR, self).__init__(optimizer, last_epoch, verbose) # 부모클래스의 init에 필요한 arg 넘겨줌.
         # super init을 해도 self.base_lrs를 왜 상속을 못받는 거지?
-        # 여기서 부모 메소드 init 과정에서 self.get_lr을 호출함. 근데 get_lr에는 self.substract_lr이 들어가 있고, 그건 다시 부모클래스 init이 "완료"되어야 하기 때문에 
+        # 여기서 부모 메소드 init 과정에서 self.get_lr을 호출함. 근데 get_lr에는 self.subtract_lr이 들어가 있고, 그건 다시 부모클래스 init이 "완료"되어야 하기 때문에 
         # 아래 명령을 실행한 적이 없음. 그래서 계속 그런 attribute이 없다고 뜨는 거임.
             
         
@@ -56,7 +56,7 @@ class LinearDecayLR(_LRScheduler):
             warnings.warn("To get the learning rate computed by the scheduler, "
                         "please use 'get_last_lr()'.", UserWarning)
 
-        return [group['lr']-self.substract_lr for group in self.optimizer.param_groups]
+        return [group['lr']-self.subtract_lr for group in self.optimizer.param_groups]
 
 
 class DelayedLinearDecayLR(LinearDecayLR):
@@ -72,7 +72,7 @@ class DelayedLinearDecayLR(LinearDecayLR):
                         "please use 'get_last_lr()'.", UserWarning)
 
         if self.decay_after <= self.last_epoch < (self.decay_after + self.total_iters): # 여기에 total iter도 고려해줘야함.
-            return [group['lr']-self.substract_lr for group in self.optimizer.param_groups]
+            return [group['lr']-self.subtract_lr for group in self.optimizer.param_groups]
 
         else:
             return [group['lr'] for group in self.optimizer.param_groups]

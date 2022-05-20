@@ -211,5 +211,5 @@ if __name__ == "__main__":
 
     op_d = D(ip) # forward
     op_g = G(ip)
-    print(op_g.shape)
+    print(op_g.min(), op_g.max())
     # print(*shape_dict.values(), sep="\n")

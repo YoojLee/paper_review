@@ -1,14 +1,16 @@
 import torch
 from torch.utils.data import DataLoader
-from torchvision.utils import save_image
 
 from augmentation import BaseAugmentation
 from criterion import *
 from dataset import UnalignedDataset
 from model import *
-from utils import parse_opt
+from utils import *
 from scheduler import DelayedLinearDecayLR
 
+import cv2
+import numpy as np
+import pickle
 from tqdm import tqdm
 from functools import partial
 import itertools
@@ -24,8 +26,8 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, de
     optim_G, optim_D = optimizers
     scheduler_G, scheduler_D = schedulers
 
-    criterion_G = AdversarialLoss(mode='g') # 왜 direction끼리 얘를 공유해야하는지 잘 모르겠음..
-    criterion_D = AdversarialLoss(mode='d')
+    criterion_G = AdversarialLoss() # 왜 direction끼리 얘를 공유해야하는지 잘 모르겠음..
+    criterion_D = AdversarialLoss()
     criterion_cyc = CycleConsistencyLoss()
 
     G.train()
@@ -47,21 +49,26 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, de
             X, Y = X.to(device), Y.to(device)
 
             #### Generator ####
-            fake_xy = G(X)
-            fake_yx = F(Y)
 
-            d_xy = D_y(fake_xy) # D_target
-            d_yx = D_x(fake_yx)
+            for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
+                p_x.requires_grad = False
+                p_y.requires_grad = False
 
-            real_label = torch.tensor([1.0]).expand_as(d_xy).to(device)
-            fake_label = torch.tensor([0.0]).expand_as(d_yx).to(device)
+            g_x = G(X)
+            f_y = F(Y)
 
-            # adversarial loss 계산
-            loss_G_xy = criterion_G.forward_G(d_xy, real_label)
-            loss_F_yx = criterion_G.forward_G(d_yx, real_label)
+            d_g_x = D_y(g_x) # D_target
+            d_f_y = D_x(f_y)
+
+            real_label = torch.tensor([1.0]).expand_as(d_g_x).to(device)
+            fake_label = torch.tensor([0.0]).expand_as(d_f_y).to(device)
+
+            # adversarial loss 계산 -> 가짜를 진짜로 판별할 확률 최대화
+            loss_G_xy = criterion_G.forward_G(d_g_x, real_label)
+            loss_F_yx = criterion_G.forward_G(d_f_y, real_label)
 
             # cycle loss 계산
-            loss_cyc = criterion_cyc(X, Y, F(fake_xy), G(fake_yx))
+            loss_cyc = criterion_cyc(X, Y, F(g_x), G(f_y))
 
             loss_G = loss_G_xy + loss_F_yx + lambda_cyc*loss_cyc
             
@@ -69,8 +76,12 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, de
             optim_G.step() # alternating training 해야돼서 G랑 D는 optimizer 따로 쓰는 거임.
 
             #### Discriminator ####
-            loss_D_xy = criterion_D.forward_D(D_y(Y), real_label, d_xy, fake_label)
-            loss_D_yx = criterion_D.forward_D(D_x(X), real_label, d_yx, fake_label)
+            for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
+                p_x.requires_grad = True
+                p_y.requires_grad = True
+
+            loss_D_xy = criterion_D.forward_D(D_y(Y), real_label, d_g_x, fake_label)
+            loss_D_yx = criterion_D.forward_D(D_x(X), real_label, d_f_y, fake_label)
 
             loss_D_xy.backward() # loss_G backward는 왜 퉁쳐서 하면서 얘는 따로 함..?
             loss_D_yx.backward()
@@ -80,12 +91,18 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, de
             description = f'Epoch: {epoch+1}/{n_epochs} || Step: {step+1}/{len(train_loader)} || Generator Loss: {round(loss_G.item(), 4)} || Discriminator Loss (XY, YX): {round(loss_D_xy.item(), 4)},{round(loss_D_yx.item(), 4)}'
             pbar.set_description(description)
 
-            batches_done = epoch * len(train_loader) + step
+            # batches_done = epoch * len(train_loader) + step
 
-            if batches_done % sample_interval == 0:
-                save_image(fake_xy.clone().detach()[:25], f"{sample_save_dir}/%d.png" % batches_done, nrow=5, normalize=True)
+            # if batches_done % sample_interval == 0:
+            #     save_image(g_x.clone().detach(), f"{sample_save_dir}/%d.png" % batches_done, nrow=5, normalize=True)
         scheduler_G.step()
         scheduler_D.step()
+
+        # fake_np = g_x.clone().detach().cpu().numpy()
+        # with open(f"{sample_save_dir}/example.pickle", "wb") as f:
+        #     pickle.dump(fake_np, f)
+
+        save_image(g_x.clone().detach().cpu(), f"{sample_save_dir}/epoch{epoch+1}.png")
     
 
 def main():
@@ -115,8 +132,8 @@ def main():
 
     # scheduler
     
-    scheduler_G = DelayedLinearDecayLR(optim_G, opt.lr, 0, 5, decay_after=2, verbose=True)
-    scheduler_D = DelayedLinearDecayLR(optim_D, opt.lr, 0, 5, decay_after=2, verbose=True)
+    scheduler_G = DelayedLinearDecayLR(optim_G, opt.lr, opt.target_lr, opt.last_epoch, decay_after=opt.decay_after, verbose=opt.lr_decay_verbose)
+    scheduler_D = DelayedLinearDecayLR(optim_D, opt.lr, opt.target_lr, opt.last_epoch, decay_after=opt.decay_after, verbose=opt.lr_decay_verbose)
 
 
     kwargs = {

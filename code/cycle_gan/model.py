@@ -206,8 +206,9 @@ if __name__ == "__main__":
     D = Discriminator()
     G = Generator(**kwargs)
 
-    print(G)
     print(D)
+    for name, param in D.named_parameters():
+        print(name)
     
     get_all_layers(D) # forward hook to check the output shape of the feature map after every layer.
 

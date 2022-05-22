@@ -48,15 +48,14 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, la
 
             #### Generator ####
 
-            # for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
-            #     p_x.requires_grad = False
-            #     p_y.requires_grad = False
+            for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
+                p_x.requires_grad = False
+                p_y.requires_grad = False
 
             g_x = G(X) # fake_B
             f_y = F(Y) # fake_A
             rec_x = F(g_x) # rec_A (reconstruction)
             rec_y = G(f_y) # rec_B
-
 
             d_g_x = D_y(g_x)
             d_f_y = D_x(f_y)
@@ -83,9 +82,9 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, la
             optim_G.step() # alternating training 해야돼서 G랑 D는 optimizer 따로 쓰는 거임.
 
             #### Discriminator ####
-            # for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
-            #     p_x.requires_grad = True
-            #     p_y.requires_grad = True
+            for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
+                p_x.requires_grad = True
+                p_y.requires_grad = True
 
             loss_D_xy = criterion_D.forward_D(D_y(Y), real_label, D_y(g_x.detach()), fake_label)
             loss_D_yx = criterion_D.forward_D(D_x(X), real_label, D_x(f_y.detach()), fake_label)
@@ -117,10 +116,12 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, la
         if log_interval > 0: # if use wandb
             wandb.log(
                 {
-                    "Generated Target": wandb.Image(denormalize_image(g_x.clone().detach().cpu())), # G(X)
-                    "Reconstructed Target": wandb.Image(denormalize_image(rec_y.clone().detach().cpu())),
-                    "Generated Input": wandb.Image(denormalize_image(f_y.clone().detach().cpu())), # F(Y)
-                    "Reconstructed Input": wandb.Image(denormalize_image(rec_x.clone().detach().cpu()))
+                    "X": wandb.Image(denormalize_image(X.clone().detach().cpu())),
+                    "Y": wandb.Image(denormalize_image(Y.clone().detach().cpu())),
+                    "Generated Target (X->Y)": wandb.Image(denormalize_image(g_x.clone().detach().cpu())), # G(X)
+                    "Reconstructed Target (Y->X->Y)": wandb.Image(denormalize_image(rec_y.clone().detach().cpu())),
+                    "Generated Input (Y->X)": wandb.Image(denormalize_image(f_y.clone().detach().cpu())), # F(Y)
+                    "Reconstructed Input (X->Y->X)": wandb.Image(denormalize_image(rec_x.clone().detach().cpu()))
                 }
             )
         

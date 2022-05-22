@@ -18,4 +18,5 @@
 
 - [ ] GAN의 alternating training check
 - [X] cycleGAN
-  - [ ] 추가할 사항들 체크하고 정리
+  - [ ] 실험 결과 재현이 되지 않는 문제 해결
+  - [ ] wandb logging

@@ -8,17 +8,14 @@ from model import *
 from utils import *
 from scheduler import DelayedLinearDecayLR
 
-import cv2
-import numpy as np
-import pickle
-from tqdm import tqdm
 from functools import partial
 import itertools
 import os
+from tqdm import tqdm
+import wandb
 
     
-
-def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, device, sample_interval, sample_save_dir):
+def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, lambda_idt, device, log_interval, sample_save_dir):
     
     os.makedirs(sample_save_dir, exist_ok=True)
 
@@ -29,6 +26,7 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, de
     criterion_G = AdversarialLoss() # 왜 direction끼리 얘를 공유해야하는지 잘 모르겠음..
     criterion_D = AdversarialLoss()
     criterion_cyc = CycleConsistencyLoss()
+    criterion_idt = IdentityLoss()
 
     G.train()
     F.train()
@@ -50,14 +48,17 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, de
 
             #### Generator ####
 
-            for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
-                p_x.requires_grad = False
-                p_y.requires_grad = False
+            # for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
+            #     p_x.requires_grad = False
+            #     p_y.requires_grad = False
 
-            g_x = G(X)
-            f_y = F(Y)
+            g_x = G(X) # fake_B
+            f_y = F(Y) # fake_A
+            rec_x = F(g_x) # rec_A (reconstruction)
+            rec_y = G(f_y) # rec_B
 
-            d_g_x = D_y(g_x) # D_target
+
+            d_g_x = D_y(g_x)
             d_f_y = D_x(f_y)
 
             real_label = torch.tensor([1.0]).expand_as(d_g_x).to(device)
@@ -68,48 +69,75 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, de
             loss_F_yx = criterion_G.forward_G(d_f_y, real_label)
 
             # cycle loss 계산
-            loss_cyc = criterion_cyc(X, Y, F(g_x), G(f_y))
+            loss_cyc = criterion_cyc(X, Y, rec_x, rec_y)
 
-            loss_G = loss_G_xy + loss_F_yx + lambda_cyc*loss_cyc
+            # identity loss 계산
+            if lambda_idt > 0:
+                loss_idt = lambda_idt*criterion_idt(X, Y, f_y, g_x)
+            else: # lambda_idt = 0
+                loss_idt = 0
+
+            loss_G = loss_G_xy + loss_F_yx + lambda_cyc*loss_cyc + lambda_idt*loss_idt
             
             loss_G.backward()
             optim_G.step() # alternating training 해야돼서 G랑 D는 optimizer 따로 쓰는 거임.
 
             #### Discriminator ####
-            for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
-                p_x.requires_grad = True
-                p_y.requires_grad = True
+            # for p_x, p_y in zip(D_x.parameters(), D_y.parameters()):
+            #     p_x.requires_grad = True
+            #     p_y.requires_grad = True
 
-            loss_D_xy = criterion_D.forward_D(D_y(Y), real_label, d_g_x, fake_label)
-            loss_D_yx = criterion_D.forward_D(D_x(X), real_label, d_f_y, fake_label)
+            loss_D_xy = criterion_D.forward_D(D_y(Y), real_label, D_y(g_x.detach()), fake_label)
+            loss_D_yx = criterion_D.forward_D(D_x(X), real_label, D_x(f_y.detach()), fake_label)
 
             loss_D_xy.backward() # loss_G backward는 왜 퉁쳐서 하면서 얘는 따로 함..?
             loss_D_yx.backward()
 
             optim_D.step()
 
+            ## logging
             description = f'Epoch: {epoch+1}/{n_epochs} || Step: {step+1}/{len(train_loader)} || Generator Loss: {round(loss_G.item(), 4)} || Discriminator Loss (XY, YX): {round(loss_D_xy.item(), 4)},{round(loss_D_yx.item(), 4)}'
             pbar.set_description(description)
 
-            # batches_done = epoch * len(train_loader) + step
+            if (step+1) % log_interval == 0:
+                wandb.log(
+                    {
+                        "Loss_G(X to Y)": round(loss_G_xy.item(), 4),
+                        "Loss_F(Y to X)": round(loss_F_yx.item(), 4),
+                        "Cycle Consistency Loss": round(loss_cyc.item(), 4),
+                        "Loss_D(X to Y)": round(loss_D_xy.item(), 4),
+                        "Loss_D(Y to X)": round(loss_D_yx.item(), 4)
+                    }
+                )
 
-            # if batches_done % sample_interval == 0:
-            #     save_image(g_x.clone().detach(), f"{sample_save_dir}/%d.png" % batches_done, nrow=5, normalize=True)
+
         scheduler_G.step()
         scheduler_D.step()
 
-        # fake_np = g_x.clone().detach().cpu().numpy()
-        # with open(f"{sample_save_dir}/example.pickle", "wb") as f:
-        #     pickle.dump(fake_np, f)
-
-        save_image(g_x.clone().detach().cpu(), f"{sample_save_dir}/epoch{epoch+1}.png")
+        if log_interval > 0: # if use wandb
+            wandb.log(
+                {
+                    "Generated Target": wandb.Image(denormalize_image(g_x.clone().detach().cpu())), # G(X)
+                    "Reconstructed Target": wandb.Image(denormalize_image(rec_y.clone().detach().cpu())),
+                    "Generated Input": wandb.Image(denormalize_image(f_y.clone().detach().cpu())), # F(Y)
+                    "Reconstructed Input": wandb.Image(denormalize_image(rec_x.clone().detach().cpu()))
+                }
+            )
+        
+        else:
+            save_image(g_x.clone().detach().cpu(), f"{sample_save_dir}/epoch{epoch+1}.png")
     
 
 def main():
     opt = parse_opt()
 
+    fix_seed(opt.random_seed) # randomness 제어
+    
+    # wandb logging init
+    wandb.init(project=opt.prj_name, name=opt.exp_name, entity="yoojlee")
+
     # device
-    device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')    
+    device = torch.device(f'cuda:{opt.gpu_id}' if torch.cuda.is_available() else 'cpu')    
 
     # define transforms
     transforms = BaseAugmentation()
@@ -125,7 +153,7 @@ def main():
     D_y = Discriminator().to(device)
 
     # define optimizer
-    optimizer = partial(torch.optim.Adam, lr=opt.lr)
+    optimizer = partial(torch.optim.Adam, lr=opt.lr, betas=(opt.beta1, 0.999))
 
     optim_G = optimizer(params = itertools.chain(G.parameters(), F.parameters()))
     optim_D = optimizer(params = itertools.chain(D_x.parameters(), D_y.parameters()))
@@ -143,8 +171,9 @@ def main():
         'optimizers': [optim_G, optim_D],
         'schedulers': [scheduler_G, scheduler_D],
         'lambda_cyc': opt.cycle_loss_lambda,
-        'sample_interval': opt.sample_interval,
+        'lambda_idt': opt.idt_loss_lambda,
         'sample_save_dir': opt.sample_save_dir,
+        'log_interval': opt.logging_interval,
         'device': device
     }
 

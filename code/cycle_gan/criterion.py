@@ -30,7 +30,7 @@ class AdversarialLoss(nn.Module):
             fake: true value (fake label)
         """
         d_real_loss = self.loss(d_y, real)
-        d_fake_loss = self.loss(d_g_x.detach(), fake) # D(G(x)) to be detached in order to prevent a gradient.
+        d_fake_loss = self.loss(d_g_x, fake) # G(x) to be detached in order to prevent a gradient.
 
         d_loss = (d_real_loss + d_fake_loss)/2
 

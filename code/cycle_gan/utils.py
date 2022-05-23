@@ -1,8 +1,10 @@
 import argparse
 import cv2
 import numpy as np
+import os
 import random
 import torch
+
 from augmentation import denormalize_image
 
 def fix_seed(random_seed):
@@ -21,7 +23,7 @@ def fix_seed(random_seed):
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_epochs", type=int, default=200)
-    parser.add_argument("--lr", type=float, default=.0002) # 후반부 100 에폭은 learning rate decay가 적용이 되기 때문에 scheduler를 쓰든지 아님 만들든지 해야함.
+    parser.add_argument("--lr", type=float, default=.0002)
     parser.add_argument("--beta1", type=float, default=.5, help = "beta1 for Adam optimizer")
     parser.add_argument("--decay_after", type=int, default=100)
     parser.add_argument("--target_lr", type=float, default=0.0)
@@ -43,6 +45,7 @@ def parse_opt():
     parser.add_argument("--exp_name", type=str, default="exp1")
     parser.add_argument("--logging_interval", type=int, default=25)
     parser.add_argument("--sample_save_dir", type=str, default='code/cycle_gan/results/')
+    parser.add_argument("--checkpoint_dir", type=str, default="code/cycle_gan/weights/")
 
     opt = parser.parse_args()
 
@@ -59,16 +62,41 @@ def save_image(image, save_path, denormalize=True):
 
     cv2.imwrite(save_path, cv2.cvtColor(image.transpose(1,2,0), cv2.COLOR_BGR2RGB))
 
-if __name__ == "__main__":
-    import pickle
+def save_checkpoint(epoch, G, F, D_x, D_y, optim_G, optim_D, scheduler_G, scheduler_D, saved_dir, file_name):
+    check_point = {'epoch': epoch,
+                    'G': G.state_dict(),
+                    'F': F.state_dict(),
+                    'D_x': D_x.state_dict(),
+                    'D_y': D_y.state_dict(),
+                    'optimG_state_dict': optim_G.state_dict(),
+                    'optimD_state_dict': optim_D.state_dict()
+                    }
+    if scheduler_G and scheduler_D:
+        check_point['scheduler_G_state_dict'] = scheduler_G.state_dict()
+        check_point['scheduler_D_state_dict'] = scheduler_D.state_dict()
 
-    with open("/home/workspace/code/cycle_gan/results2/example.pickle", "rb") as f:
-        sample = pickle.load(f)
+    os.makedirs(saved_dir, exist_ok=True) # make a directory to save a model if not exist.
 
-    print(sample.min(), sample.max())
-    sample = denormalize_image(sample)
-    sample = sample.astype(np.uint8)
-    print(sample.shape)
+    output_path = os.path.join(saved_dir, file_name)
+    torch.save(check_point, output_path)
 
-    cv2.imwrite("/home/workspace/code/cycle_gan/results2/example.png", sample.transpose(1,2,0))
-    cv2.imwrite("/home/workspace/code/cycle_gan/results2/example_convert.png", cv2.cvtColor(sample.transpose(1,2,0), cv2.COLOR_BGR2RGB))
+
+def load_checkpoint(checkpoint_path, G, F, D_x, D_y, optim_G, optim_D, scheduler_G, scheduler_D, mode):
+    # load model if resume_from is set
+    checkpoint = torch.load(checkpoint_path)
+    G.load_state_dict(checkpoint['G'])
+    F.load_state_dict(checkpoint['F'])
+    D_x.load_state_dict(checkpoint['D_x'])
+    D_y.load_state_dict(checkpoint['D_y'])
+
+    if mode =="all":
+        optim_G.load_state_dict(checkpoint['optimG_state_dict'])
+        optim_D.load_state_dict(checkpoint['optimD_state_dict'])
+        
+        if scheduler_G and scheduler_D:
+            scheduler_G.load_state_dict(checkpoint['scheduler_G_state_dict'])
+            scheduler_D.load_state_dict(checkpoint['scheduler_D_state_dict'])
+
+    start_epoch = checkpoint['epoch']
+
+    return G, F, D_x, D_y, optim_G, optim_D, scheduler_G, scheduler_D, start_epoch

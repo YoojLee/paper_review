@@ -15,7 +15,7 @@ from tqdm import tqdm
 import wandb
 
     
-def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, lambda_idt, device, log_interval, sample_save_dir):
+def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, lambda_idt, device, log_interval, sample_save_dir, checkpoint_dir):
     
     os.makedirs(sample_save_dir, exist_ok=True)
 
@@ -113,6 +113,7 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, la
         scheduler_G.step()
         scheduler_D.step()
 
+        # saving sample outputs
         if log_interval > 0: # if use wandb
             wandb.log(
                 {
@@ -127,6 +128,9 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, la
         
         else:
             save_image(g_x.clone().detach().cpu(), f"{sample_save_dir}/epoch{epoch+1}.png")
+
+        # saving checkpoints
+        save_checkpoint(epoch, G, F, D_x, D_y, optim_G, optim_D, scheduler_G, scheduler_D, checkpoint_dir, file_name=f"epoch{epoch+1}.pth")
     
 
 def main():
@@ -175,6 +179,7 @@ def main():
         'lambda_idt': opt.idt_loss_lambda,
         'sample_save_dir': opt.sample_save_dir,
         'log_interval': opt.logging_interval,
+        'checkpoint_dir': os.path.join(opt.checkpoint_dir, opt.exp_name),
         'device': device
     }
 

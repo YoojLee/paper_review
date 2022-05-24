@@ -38,7 +38,7 @@ def parse_opt():
     parser.add_argument("--data_root_A", type=str, default="code/cycle_gan/horse2zebra/trainA")
     parser.add_argument("--data_root_B", type=str, default="code/cycle_gan/horse2zebra/trainB")
     parser.add_argument("--is_train", type=bool, default=True)
-    parser.add_argument("--num_threads", type=int, default=16)
+    parser.add_argument("--num_threads", type=int, default=24)
     
     parser.add_argument("--gpu_id", type=int, default=1)
     parser.add_argument("--random_seed", type=int, default=0)

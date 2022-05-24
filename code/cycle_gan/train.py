@@ -139,7 +139,7 @@ def main():
     fix_seed(opt.random_seed) # randomness 제어
     
     # wandb logging init
-    wandb.init(project=opt.prj_name, name=opt.exp_name, entity="yoojlee")
+    wandb.init(project=opt.prj_name, name=opt.exp_name, entity="yoojlee", config=vars(opt)) # save a configuration of experiments on an wandb session.
 
     # device
     device = torch.device(f'cuda:{opt.gpu_id}' if torch.cuda.is_available() else 'cpu')    

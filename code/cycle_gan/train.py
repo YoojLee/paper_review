@@ -77,7 +77,6 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, la
                 loss_idt = 0
 
             loss_G = loss_G_xy + loss_F_yx + lambda_cyc*loss_cyc + lambda_idt*loss_idt
-            
             loss_G.backward()
             optim_G.step() # alternating training 해야돼서 G랑 D는 optimizer 따로 쓰는 거임.
 
@@ -89,8 +88,10 @@ def train(train_loader, n_epochs, models, optimizers, schedulers, lambda_cyc, la
             loss_D_xy = criterion_D.forward_D(D_y(Y), real_label, D_y(g_x.detach()), fake_label)
             loss_D_yx = criterion_D.forward_D(D_x(X), real_label, D_x(f_y.detach()), fake_label)
 
-            loss_D_xy.backward() # loss_G backward는 왜 퉁쳐서 하면서 얘는 따로 함..?
-            loss_D_yx.backward()
+            # loss_D_xy.backward()
+            # loss_D_yx.backward()
+            loss_D = (loss_D_xy+loss_D_yx)/2 # G와 같은 방식으로 backward시키자.
+            loss_D.backward()
 
             optim_D.step()
 

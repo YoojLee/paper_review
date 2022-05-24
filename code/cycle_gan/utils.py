@@ -4,6 +4,9 @@ import numpy as np
 import os
 import random
 import torch
+from torch.optim.optimizer import Optimizer
+from torch.optim.lr_scheduler import _LRScheduler
+from typing import Optional
 
 from augmentation import denormalize_image
 
@@ -46,6 +49,7 @@ def parse_opt():
     parser.add_argument("--logging_interval", type=int, default=25)
     parser.add_argument("--sample_save_dir", type=str, default='code/cycle_gan/results/')
     parser.add_argument("--checkpoint_dir", type=str, default="code/cycle_gan/weights/")
+    parser.add_argument("--load_epoch", type=int, default=150)
 
     opt = parser.parse_args()
 
@@ -81,13 +85,35 @@ def save_checkpoint(epoch, G, F, D_x, D_y, optim_G, optim_D, scheduler_G, schedu
     torch.save(check_point, output_path)
 
 
-def load_checkpoint(checkpoint_path, G, F, D_x, D_y, optim_G, optim_D, scheduler_G, scheduler_D, mode):
+def load_checkpoint(checkpoint_path, G, F, D_x:Optional[torch.nn.Module]=None, D_y:Optional[torch.nn.Module]=None, \
+                    optim_G:Optional[Optimizer]=None, optim_D:Optional[Optimizer]=None, \
+                    scheduler_G:Optional[_LRScheduler]=None, scheduler_D:Optional[_LRScheduler]=None, mode:str="model"):
+    """
+    - Args
+        checkpoint_path (str): a path of the saved checkpoint
+        G (network): generator (X->Y)
+        F (network): generator (Y->X)
+        D_x (network, Optional): discriminator (for X)
+        D_y (network, Optional): discriminator (for Y)
+        optim_G (Optional[Optimizer]): optimizer for generator
+        optim_D (Optional[Optimizer]): optimizer for discriminator
+        scheduler_G (Optional[_LRScheduler]): scheduler for Generator
+        scheduler_D (Optional[_LRScheduler]): scheduler for Discriminator
+        mode (str): "model" for model only or "all" for all the instances.
+    """
     # load model if resume_from is set
     checkpoint = torch.load(checkpoint_path)
     G.load_state_dict(checkpoint['G'])
     F.load_state_dict(checkpoint['F'])
-    D_x.load_state_dict(checkpoint['D_x'])
-    D_y.load_state_dict(checkpoint['D_y'])
+
+    if D_x and D_y:
+        D_x.load_state_dict(checkpoint['D_x'])
+        D_y.load_state_dict(checkpoint['D_y'])
+
+    start_epoch = checkpoint['epoch']
+
+    if mode == "model":
+        return G, F, D_x, D_y
 
     if mode =="all":
         optim_G.load_state_dict(checkpoint['optimG_state_dict'])
@@ -97,6 +123,9 @@ def load_checkpoint(checkpoint_path, G, F, D_x, D_y, optim_G, optim_D, scheduler
             scheduler_G.load_state_dict(checkpoint['scheduler_G_state_dict'])
             scheduler_D.load_state_dict(checkpoint['scheduler_D_state_dict'])
 
-    start_epoch = checkpoint['epoch']
-
-    return G, F, D_x, D_y, optim_G, optim_D, scheduler_G, scheduler_D, start_epoch
+            return G, F, D_x, D_y, optim_G, optim_D, scheduler_G, scheduler_D, start_epoch
+        
+        return G, F, D_x, D_y, optim_G, optim_D, start_epoch
+    
+    else:
+        raise ValueError("mode should be one of 'model' or 'all'")

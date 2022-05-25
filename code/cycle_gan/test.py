@@ -64,9 +64,9 @@ if __name__ == "__main__":
     G = Generator(init_channel=64, kernel_size=3, stride=2, n_blocks=9)
     F = Generator(init_channel=64, kernel_size=3, stride=2, n_blocks=9)
 
-    G, F, _, _, _ = load_checkpoint(os.path.join(opt.checkpoint_dir, f"epoch{opt.load_epoch}.pth"), G, F)
-
-    save_dir = os.path.join(opt.sample_save_dir, f"epoch{opt.load_epoch}")
+    G, F, _, _, _ = load_checkpoint(os.path.join(opt.last_checkpoint_dir, f"epoch{opt.load_epoch}.pth"), G, F)
+    
+    save_dir = os.path.join(opt.sample_save_dir, opt.exp_name, f"epoch{opt.load_epoch}")
     os.makedirs(save_dir, exist_ok=True)
 
     test(test_loader, G, F, device, save_dir)

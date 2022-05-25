@@ -193,21 +193,6 @@ def main():
     # wandb logging init
     wandb.init(project=opt.prj_name, name=opt.exp_name, entity="yoojlee", config=vars(opt)) # save a configuration of experiments on an wandb session.
 
-    # kwargs = {
-    #     'train_loader': train_loader,
-    #     'n_epochs': opt.n_epochs,
-    #     'models': [G, F, D_x, D_y],
-    #     'optimizers': [optim_G, optim_D],
-    #     'schedulers': [scheduler_G, scheduler_D],
-    #     'lambda_cyc': opt.cycle_loss_lambda,
-    #     'lambda_idt': opt.idt_loss_lambda,
-    #     'sample_save_dir': opt.sample_save_dir,
-    #     'log_interval': opt.logging_interval,
-    #     'checkpoint_dir': os.path.join(opt.checkpoint_dir, opt.exp_name),
-    #     'resume_from': opt.resume_from,
-    #     'device': device
-    # }
-
     train(opt)
 
 

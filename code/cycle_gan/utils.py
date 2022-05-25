@@ -68,7 +68,10 @@ def parse_opt():
 
     return opt
 
-def save_image(image, save_path, denormalize=True):
+def save_image(image:torch.Tensor, save_path:str, denormalize:bool=True):
+    """
+    convert a torch.Tensor to a numpy array-> denormalize (if needed) -> type casting -> writing image to the given path
+    """
     if isinstance(image, torch.Tensor):
         image = image.numpy()
     

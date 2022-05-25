@@ -181,7 +181,8 @@ def train(opt):
             save_image(g_x.clone().detach().cpu(), f"{opt.sample_save_dir}/epoch{epoch+1}.png")
 
         # saving checkpoints
-        save_checkpoint(epoch, G, F, D_x, D_y, optim_G, optim_D, scheduler_G, scheduler_D, opt.checkpoint_dir, file_name=f"epoch{epoch+1}.pth")
+        checkpoint_dir = os.path.join(opt.checkpoint_dir, opt.exp_name)
+        save_checkpoint(epoch, G, F, D_x, D_y, optim_G, optim_D, scheduler_G, scheduler_D, checkpoint_dir, file_name=f"epoch{epoch+1}.pth")
     
 
 def main():

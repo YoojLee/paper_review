@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from collections import OrderedDict
+from typing import Union
 
 shape_dict=dict() # for checking the output's shape
 
@@ -91,7 +92,7 @@ class Generator(nn.Module):
         assert op.shape == x.shape, f"output shape ({op.shape}) must be same with the input size ({x.shape})"
         return op
 
-    def _make_block(self, in_channels:int, out_channels:int, kernel_size:int, stride:int, padding:int=1, mode:str='d'):
+    def _make_block(self, in_channels:int, out_channels:int, kernel_size:int, stride:int, padding:Union[int,str]=1, mode:str='d'):
         """
         builds a conv block
 

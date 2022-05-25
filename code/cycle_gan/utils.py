@@ -25,31 +25,44 @@ def fix_seed(random_seed):
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_epochs", type=int, default=200)
-    parser.add_argument("--lr", type=float, default=.0002)
-    parser.add_argument("--beta1", type=float, default=.5, help = "beta1 for Adam optimizer")
-    parser.add_argument("--decay_after", type=int, default=100)
-    parser.add_argument("--target_lr", type=float, default=0.0)
-    parser.add_argument("--last_epoch", type=int, default=100)
-    parser.add_argument("--lr_decay_verbose", type=bool, default=False)
-    parser.add_argument("--batch_size", type=int, default=1)
-    parser.add_argument("--cycle_loss_lambda", type=float, default=10.0)
-    parser.add_argument("--idt_loss_lambda", type=float, default=0.5)
-    parser.add_argument("--data_root_A", type=str, default="code/cycle_gan/horse2zebra/trainA")
-    parser.add_argument("--data_root_B", type=str, default="code/cycle_gan/horse2zebra/trainB")
-    parser.add_argument("--is_train", type=bool, default=True)
-    parser.add_argument("--num_threads", type=int, default=16)
     
+    # miscellaneous arguments for training
+    parser.add_argument("--is_train", type=bool, default=True)
+    parser.add_argument("--num_threads", type=int, default=24)
     parser.add_argument("--gpu_id", type=int, default=1)
     parser.add_argument("--random_seed", type=int, default=0)
 
+    # image datasets
+    parser.add_argument("--data_root_A", type=str, default="code/cycle_gan/horse2zebra/trainA")
+    parser.add_argument("--data_root_B", type=str, default="code/cycle_gan/horse2zebra/trainB")
+
+    # training details
+    parser.add_argument("--batch_size", type=int, default=1)
+    parser.add_argument("--n_epochs", type=int, default=200)
+    parser.add_argument("--beta1", type=float, default=.5, help = "beta1 for Adam optimizer")
+    parser.add_argument("--lr", type=float, default=.0002)
+
+    # learning rate decay
+    parser.add_argument("--decay_after", type=int, default=100)
+    parser.add_argument("--target_lr", type=float, default=0.0)
+    parser.add_argument("--total_iters", type=int, default=100)
+    parser.add_argument("--lr_decay_verbose", type=bool, default=False)
+
+    # hyperparameter in respect to a loss
+    parser.add_argument("--lambda_cyc", type=float, default=10.0)
+    parser.add_argument("--lambda_idt", type=float, default=0.5)
+    
     # wandb & logging
     parser.add_argument("--prj_name", type=str, default="cycle_gan")
     parser.add_argument("--exp_name", type=str, default="exp1")
-    parser.add_argument("--logging_interval", type=int, default=25)
+    parser.add_argument("--log_interval", type=int, default=25)
     parser.add_argument("--sample_save_dir", type=str, default='code/cycle_gan/results/')
-    parser.add_argument("--checkpoint_dir", type=str, default="code/cycle_gan/weights/")
+    parser.add_argument("--last_checkpoint_dir", type=str, default="code/cycle_gan/weights/D_averaging")
+    parser.add_argument("--checkpoint_dir", type=str, default="code/cycle_gan/weights")
     parser.add_argument("--load_epoch", type=int, default=150)
+    
+    # resume from
+    parser.add_argument("--resume_from", action="store_true")
 
     opt = parser.parse_args()
 
@@ -113,7 +126,7 @@ def load_checkpoint(checkpoint_path, G, F, D_x:Optional[torch.nn.Module]=None, D
     start_epoch = checkpoint['epoch']
 
     if mode == "model":
-        return G, F, D_x, D_y
+        return G, F, D_x, D_y, start_epoch
 
     if mode =="all":
         optim_G.load_state_dict(checkpoint['optimG_state_dict'])

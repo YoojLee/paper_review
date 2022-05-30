@@ -56,7 +56,7 @@ def parse_opt():
     parser.add_argument("--prj_name", type=str, default="cycle_gan")
     parser.add_argument("--exp_name", type=str, default="exp1")
     parser.add_argument("--log_interval", type=int, default=25)
-    parser.add_argument("--sample_save_dir", type=str, default='code/cycle_gan/test_results/')
+    parser.add_argument("--sample_save_dir", type=str, default='code/cycle_gan/test_results/') # only for test.py
     parser.add_argument("--last_checkpoint_dir", type=str, default="code/cycle_gan/weights/D_averaging")
     parser.add_argument("--checkpoint_dir", type=str, default="code/cycle_gan/weights")
     parser.add_argument("--load_epoch", type=int, default=150)

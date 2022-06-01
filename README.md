@@ -16,7 +16,7 @@
 
 # 코드 구현
 
-- [ ] GAN의 alternating training check
+- [X] GAN의 alternating training check
 - [X] cycleGAN
   - [X] 실험 결과 재현이 되지 않는 문제 해결
   - [X] wandb logging

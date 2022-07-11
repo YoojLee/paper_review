@@ -11,7 +11,7 @@
 - [X] StarGANs
 - [ ] Collaborative Filtering for Implicit Feedback Datasets
 - [ ] Contrastive Learning for Unpaired Image-to-Image Translation
-- [ ] ViT
+- [X] ViT
 
 
 # 코드 구현

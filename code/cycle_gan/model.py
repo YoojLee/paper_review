@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from collections import OrderedDict
+from typing import Union
 
 shape_dict=dict() # for checking the output's shape
 
@@ -23,11 +24,11 @@ class ResidualBlock(nn.Module):
         self.out_channels = out_channels
 
         self.block = nn.Sequential(
-            nn.Conv2d(self.in_channels, self.out_channels, kernel_size=3, padding='same'),
-            nn.BatchNorm2d(self.out_channels),
+            nn.Conv2d(self.in_channels, self.out_channels, kernel_size=3, padding='same', padding_mode='reflect'),
+            nn.InstanceNorm2d(self.out_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(self.in_channels, self.out_channels, kernel_size=3, padding='same'),
-            nn.BatchNorm2d(self.out_channels)
+            nn.Conv2d(self.in_channels, self.out_channels, kernel_size=3, padding='same', padding_mode='reflect'),
+            nn.InstanceNorm2d(self.out_channels)
         )
 
     def forward(self, x):
@@ -79,8 +80,7 @@ class Generator(nn.Module):
             layers[f'u_{k}'] = self._make_block(in_channels=k*2, out_channels=k, kernel_size=self.kernel_size, stride=self.stride, mode='u')
 
         # last conv layer
-        layers['conv_last'] =  self._make_block(in_channels=self.init_channel, out_channels=3, kernel_size=7, stride=1, padding='same') # last conv layer (to rgb)
-        #layers['sigmoid'] = nn.Sigmoid()
+        layers['conv_last'] = nn.Conv2d(in_channels=self.init_channel, out_channels=3, kernel_size=7, stride=1, padding='same', padding_mode='reflect') # last conv layer (to rgb)
         layers['tanh'] = nn.Tanh()
 
         self.model = nn.Sequential(
@@ -92,7 +92,7 @@ class Generator(nn.Module):
         assert op.shape == x.shape, f"output shape ({op.shape}) must be same with the input size ({x.shape})"
         return op
 
-    def _make_block(self, in_channels:int, out_channels:int, kernel_size:int, stride:int, padding:int=1, mode:str='d'):
+    def _make_block(self, in_channels:int, out_channels:int, kernel_size:int, stride:int, padding:Union[int,str]=1, mode:str='d'):
         """
         builds a conv block
 
@@ -206,10 +206,13 @@ if __name__ == "__main__":
 
     D = Discriminator()
     G = Generator(**kwargs)
+
+    print(D)
+    for name, param in D.named_parameters():
+        print(name)
     
     get_all_layers(D) # forward hook to check the output shape of the feature map after every layer.
 
     op_d = D(ip) # forward
     op_g = G(ip)
-    print(op_g.shape)
     # print(*shape_dict.values(), sep="\n")

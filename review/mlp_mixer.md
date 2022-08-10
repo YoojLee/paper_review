@@ -37,6 +37,8 @@ Token-mixing MLPs와 같은 경우, 각 다른 공간적 위치(각 토큰) 간 
 개별 열을 입력으로 받게 된다.
 이 두 가지 레이어가 서로 번갈아가며 등장하면서, 입력 차원 (token, channel) 두 가지의 상호 작용을 가능하게 함.
 
-아주 극단적인 경우, Mixer는 channel mixing의 경우 1x1 convolution을 사용하는
+아주 극단적인 경우, Mixer는 CNN의 특별한 케이스라고 할 수 있다. channel mixing의 경우 1x1 convolution을 사용하는 CNN과 동일하다.
 
+![channel_mixing_1x1_conv](../figures/mixer_channel_mixing_conv.png)
 
+token mixing mlp의 경우에는 하나의 필터를 공유하는(parameter sharing) full receptive field의 single channel depth-wise convolution이라고 할 수 있다.

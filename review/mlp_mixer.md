@@ -180,6 +180,13 @@ Mixer에서는 interpolation 등의 기법을 사용하지 않고, block diagona
 $H=W=12$, $k=2$라고 할 때, $H'=W'=24$이다. 이때 p=4라고 하면, 다음과 같이 fine tuning 시 이미지 $I'$의 경우 총 36개의 패치가 만들어진다. 이를 바로 flatten시켜서 시퀀스로 만들어주는 것이 아니라 $I'$를 크게 $k\times k$로 쪼개주면, 총 $k^2$개의 sub-image가 만들어지고 각 sub-image는 9개의 이미지 패치로 구성된다. 패치 별로 우선적으로 sequence를 만들어주면 X와 같은 input sequence($c=5$)가 만들어진다. 이에 대한 token mixing mlp의 weight $W'$의 경우, $S'\times D_{s'}$의 matrix이다. 이때 $W'$의 block diagonal (각 block diagonal의 크기는 $9 \times D_s$ 이다)에 기존의 weight matrix인 $W$을 채움으로써 Fine-tuning 시 weight matrix의 조정이 이루어지게 된다.
 
 ### Main Results
+전반적으로 ViT와 유사한 양상을 보인다. 
+1. 사전학습 데이터셋 크기가 커질 수록 더 좋은 성능을 보여주었다.
+2. Regularization을 강하게 걸어주지 않으면 overfitting에 취약한 양상을 보여주었다.
+3. 정확도와 학습 비용 간의 trade-off 면에서 타 모델 대비 우수한 결과를 보여주었다.
+
+
+
 
 
 

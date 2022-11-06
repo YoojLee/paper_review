@@ -7,7 +7,7 @@ convolution과 attention 기반의 네트워크가 computer vision 분야에서 
 이에 아키텍처 전체가 MLP만을 사용한 MLP-Mixer 구조를 제안함. MLP-Mixer와 같은 경우에는 두 가지 유형의 레이어가 존재함.
 
 - MLPs applied independently to image patches ("mixing" the per-location features)
-- NLPs applied across patches ("mixing" spatial information)
+- MLPs applied across patches ("mixing" spatial information)
 
 큰 데이터셋에서 학습을 시키거나 혹은 최근 제안된 규제(regularization) 방법들을 통해 MLP-Mixer는 기존 SOTA 모델에 견줄 만한 성능을 낼 수 있었음 (pre-training and inference cost 모두).
 

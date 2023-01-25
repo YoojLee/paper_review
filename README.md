@@ -18,7 +18,7 @@
 - [ ] MoCo
 - [ ] MoCoV3
 - [ ] BYOL
-- [ ] SWAV
+- [ ] SwAV
 - [ ] What do Self-Supervised ViT learn?
 - [ ] MAE
 

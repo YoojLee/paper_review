@@ -8,8 +8,19 @@
 - [X] StarGANs
 - [ ] Contrastive Learning for Unpaired Image-to-Image Translation
 - [X] ViT
+- [X] MLP-Mixer
 - [X] Towards General Purpose Vision Systems (GPV)
 - [X] SelfPatch
+- [ ] Towards Total Recall in Industrial Anomaly Detection (PatchCore)
+- [ ] SPADE
+- [ ] Emerging Properties of Self-Supervised Vision Transformers (DINO)
+- [ ] SimCLR
+- [ ] MoCo
+- [ ] MoCoV3
+- [ ] BYOL
+- [ ] SWAV
+- [ ] What do Self-Supervised ViT learn?
+- [ ] MAE
 
 
 # 코드 구현

@@ -19,8 +19,10 @@
 - [ ] MoCoV3
 - [ ] BYOL
 - [ ] SwAV
-- [ ] What do Self-Supervised ViT learn?
+- [X] What do Self-Supervised ViT learn?
 - [ ] MAE
+- [X] iBOT
+- [ ] UniAD
 
 
 # 코드 구현

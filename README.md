@@ -23,6 +23,7 @@
 - [ ] MAE
 - [X] iBOT
 - [ ] UniAD
+- [X] MetaFormer
 
 
 # 코드 구현

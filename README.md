@@ -24,6 +24,7 @@
 - [X] iBOT
 - [ ] UniAD
 - [X] MetaFormer
+- [ ] Unified-IO
 
 
 # 코드 구현

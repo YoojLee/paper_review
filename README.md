@@ -24,4 +24,4 @@
 - [X] iBOT
 - [ ] UniAD
 - [X] MetaFormer
-- [] Unified-IO
+- [X] Unified-IO

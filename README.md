@@ -25,3 +25,4 @@
 - [ ] UniAD
 - [X] MetaFormer
 - [X] Unified-IO
+- [ ] The Pursuit of Knowledge: Discovering and Localizing Novel Categories using Dual Memory

@@ -13,7 +13,7 @@
 - [X] SelfPatch
 - [ ] Towards Total Recall in Industrial Anomaly Detection (PatchCore)
 - [ ] SPADE
-- [ ] Emerging Properties of Self-Supervised Vision Transformers (DINO)
+- [X] Emerging Properties of Self-Supervised Vision Transformers (DINO)
 - [ ] SimCLR
 - [ ] MoCo
 - [ ] MoCoV3
@@ -25,4 +25,3 @@
 - [ ] UniAD
 - [X] MetaFormer
 - [X] Unified-IO
-- [ ] The Pursuit of Knowledge: Discovering and Localizing Novel Categories using Dual Memory

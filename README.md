@@ -22,6 +22,6 @@
 - [X] What do Self-Supervised ViT learn?
 - [ ] MAE
 - [X] iBOT
-- [ ] UniAD
+- [X] UniAD
 - [X] MetaFormer
 - [X] Unified-IO

@@ -20,8 +20,9 @@
 - [ ] BYOL
 - [ ] SwAV
 - [X] What do Self-Supervised ViT learn?
-- [ ] MAE
+- [X] MAE
 - [X] iBOT
 - [X] UniAD
 - [X] MetaFormer
 - [X] Unified-IO
+- [ ] BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation

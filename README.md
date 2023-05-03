@@ -25,5 +25,6 @@
 - [X] UniAD
 - [X] MetaFormer
 - [X] Unified-IO
-- [ ] BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation
+- [X] BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation
 - [ ] LARGE LANGUAGE MODELS ARE HUMAN-LEVEL PROMPT ENGINEERS
+- [ ] Learning Transferable Visual Models From Natural Language Supervision

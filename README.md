@@ -26,6 +26,6 @@
 - [X] MetaFormer
 - [X] Unified-IO
 - [X] BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation
-- [ ] LARGE LANGUAGE MODELS ARE HUMAN-LEVEL PROMPT ENGINEERS
+- [X] LARGE LANGUAGE MODELS ARE HUMAN-LEVEL PROMPT ENGINEERS
 - [ ] Learning Transferable Visual Models From Natural Language Supervision
 - [X] Instruction Induction: From Few Examples to Natural Language Task Descriptions

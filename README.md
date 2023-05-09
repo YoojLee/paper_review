@@ -29,3 +29,5 @@
 - [X] LARGE LANGUAGE MODELS ARE HUMAN-LEVEL PROMPT ENGINEERS
 - [ ] Learning Transferable Visual Models From Natural Language Supervision
 - [X] Instruction Induction: From Few Examples to Natural Language Task Descriptions
+- [ ] OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework
+- [ ] WinCLIP: Zero-/Few-Shot Anomaly Classification and Segmentation

@@ -12,7 +12,6 @@
 - [X] Towards General Purpose Vision Systems (GPV)
 - [X] SelfPatch
 - [ ] Towards Total Recall in Industrial Anomaly Detection (PatchCore)
-- [ ] SPADE
 - [X] Emerging Properties of Self-Supervised Vision Transformers (DINO)
 - [ ] SimCLR
 - [ ] MoCo

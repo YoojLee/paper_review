@@ -31,4 +31,4 @@
 - [ ] OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework
 - [ ] WinCLIP: Zero-/Few-Shot Anomaly Classification and Segmentation
 - [ ] Flamingo: a Visual Language Model for Few-Shot Learning
-- [ ] Open-vocabulary Object Detection via Vision and Language Knowledge Distillation
+- [X] Open-vocabulary Object Detection via Vision and Language Knowledge Distillation

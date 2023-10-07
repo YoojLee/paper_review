@@ -29,6 +29,6 @@
 - [ ] Learning Transferable Visual Models From Natural Language Supervision
 - [X] Instruction Induction: From Few Examples to Natural Language Task Descriptions
 - [ ] OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework
-- [ ] WinCLIP: Zero-/Few-Shot Anomaly Classification and Segmentation
+- [X] WinCLIP: Zero-/Few-Shot Anomaly Classification and Segmentation
 - [ ] Flamingo: a Visual Language Model for Few-Shot Learning
 - [X] Open-vocabulary Object Detection via Vision and Language Knowledge Distillation

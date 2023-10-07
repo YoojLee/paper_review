@@ -32,3 +32,5 @@
 - [X] WinCLIP: Zero-/Few-Shot Anomaly Classification and Segmentation
 - [ ] Flamingo: a Visual Language Model for Few-Shot Learning
 - [X] Open-vocabulary Object Detection via Vision and Language Knowledge Distillation
+- [X] Learning to Prompt for Vision-Language Models
+- [X] Conditional Prompt Learning For Vision-Language Models

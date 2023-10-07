@@ -13,7 +13,7 @@
 - [X] SelfPatch
 - [ ] Towards Total Recall in Industrial Anomaly Detection (PatchCore)
 - [X] Emerging Properties of Self-Supervised Vision Transformers (DINO)
-- [ ] SimCLR
+- [X] SimCLR
 - [ ] MoCo
 - [ ] MoCoV3
 - [ ] BYOL
@@ -27,10 +27,16 @@
 - [X] BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation
 - [X] LARGE LANGUAGE MODELS ARE HUMAN-LEVEL PROMPT ENGINEERS
 - [ ] Learning Transferable Visual Models From Natural Language Supervision
+- [X] WinCLIP: Zero-/Few-Shot Anomaly Classification and Segmentation
 - [X] Instruction Induction: From Few Examples to Natural Language Task Descriptions
 - [ ] OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework
-- [X] WinCLIP: Zero-/Few-Shot Anomaly Classification and Segmentation
+- [ ] Optimizing Prompts for Text-to-Image Generation
+- [ ] Grounded Language-Image Pre-training
+- [X] Universal Few-shot Learning Of Dense Prediction Tasks With Viual Token Matching
+- [ ] Anomaly Detection Requires Better Representations
+- [ ] Towards Open World Object Detection
 - [ ] Flamingo: a Visual Language Model for Few-Shot Learning
 - [X] Open-vocabulary Object Detection via Vision and Language Knowledge Distillation
 - [X] Learning to Prompt for Vision-Language Models
 - [X] Conditional Prompt Learning For Vision-Language Models
+- [ ] POUF: Prompt-oriented Unsupervised Fine-tuning For Large Pre-trained Models

@@ -40,3 +40,4 @@
 - [X] Learning to Prompt for Vision-Language Models
 - [X] Conditional Prompt Learning For Vision-Language Models
 - [ ] POUF: Prompt-oriented Unsupervised Fine-tuning For Large Pre-trained Models
+- [X] SimpleNet: A Simple Network for Image Anomaly Detection and Localization

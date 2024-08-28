@@ -13,6 +13,6 @@ assignees: ''
 
 ## Experiment Highlights
 
-## Strenghths
+## Strengths
 
 ## Weaknesses

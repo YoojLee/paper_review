@@ -2,7 +2,7 @@
 name: Paper Review Templates
 about: Templates for Paper Review
 title: Paper Name
-labels: '2024'
+labels: '2025'
 assignees: ''
 
 ---
